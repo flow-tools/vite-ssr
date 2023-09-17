@@ -58,6 +58,7 @@ export async function resolveViteConfig(mode?: string) {
   return resolveConfig(
     {},
     'build',
+    mode || process.env.MODE || process.env.NODE_ENV,
     mode || process.env.MODE || process.env.NODE_ENV
   )
 }
