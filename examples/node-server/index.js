@@ -16,7 +16,7 @@ const dist = `../${example}/dist`
 const { ssr } = require(`${dist}/server/package.json`)
 
 // The manifest is required for preloading assets
-const manifest = require(`${dist}/client/ssr-manifest.json`)
+const manifest = require(`${dist}/client/.vite/ssr-manifest.json`)
 
 // This is the server renderer we just built
 const { default: renderPage } = require(`${dist}/server`)

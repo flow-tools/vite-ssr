@@ -73,7 +73,7 @@ export const viteSSR: SsrHandler = function viteSSR(
       headTags = '',
       htmlAttrs = '',
       bodyAttrs = '',
-    } = head ? renderHeadToString(head) : {}
+    } = head ? await renderHeadToString(head) : {}
 
     return { body, headTags, htmlAttrs, bodyAttrs }
   })
