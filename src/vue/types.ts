@@ -1,6 +1,6 @@
 import type { App, Component } from 'vue'
 import type {
-  RouteLocationNormalized,
+  RouteLocationResolvedGeneric,
   RouteLocationRaw,
   RouterOptions,
   Router,
@@ -18,7 +18,7 @@ export type ExtendedRouteRaw = RouteLocationRaw & {
   meta?: Meta
 }
 
-export type ExtendedRouteNormalized = RouteLocationNormalized & {
+export type ExtendedRouteNormalized = RouteLocationResolvedGeneric & {
   props?: any
   meta?: Meta
 }
@@ -37,7 +37,7 @@ export interface Context extends SharedContext {}
 export interface HookParams extends Context {
   app: App
   router: Router
-  initialRoute: RouteLocationNormalized
+  initialRoute: RouteLocationResolvedGeneric
 }
 
 export interface Hook {
