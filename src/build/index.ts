@@ -191,9 +191,7 @@ async function generatePackageJson(
   // Rollup options have priority over `viteConfig.ssr.format`
   const moduleFormat =
     (viteConfig.build?.rollupOptions?.output as OutputOptions)?.format ||
-    (serverBuildOptions.build?.rollupOptions?.output as OutputOptions)
-      ?.format ||
-    viteConfig.ssr?.format
+    (serverBuildOptions.build?.rollupOptions?.output as OutputOptions)?.format
 
   const isESM = !moduleFormat || moduleFormat === 'es' || moduleFormat === 'esm'
 

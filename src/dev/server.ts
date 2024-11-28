@@ -7,6 +7,7 @@ import {
   createServer as createViteServer,
   InlineConfig,
   ViteDevServer,
+  ServerOptions,
 } from 'vite'
 import chalk from 'chalk'
 import { getEntryPoint, getPluginOptions } from '../config'
@@ -166,7 +167,7 @@ export async function createSsrServer({
 
   const viteServer = await createViteServer({
     ...options,
-    server: options.server || { ...options },
+    server: options.server || ({ ...options } as ServerOptions),
   })
 
   if (options.polyfills !== false) {
