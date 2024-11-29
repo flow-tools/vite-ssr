@@ -8,7 +8,7 @@ import {
   INDEX_HTML,
   resolveViteConfig,
   BuildOptions,
-} from '../config'
+} from '../config.js'
 import type {
   RollupOutput,
   RollupWatcher,

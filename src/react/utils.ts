@@ -1,6 +1,6 @@
 import React from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { createUrl, getFullPath } from '../utils/route'
+import { createUrl, getFullPath } from '../utils/route.js'
 import type { Base, Meta, PagePropsOptions, State } from '../utils/types'
 import type { PropsProvider as PropsProviderType, RouteRaw } from './types'
 

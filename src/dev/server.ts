@@ -10,7 +10,7 @@ import {
   ServerOptions,
 } from 'vite'
 import chalk from 'chalk'
-import { getEntryPoint, getPluginOptions } from '../config'
+import { getEntryPoint, getPluginOptions } from '../config.js'
 
 import type { WriteResponse } from '../utils/types'
 

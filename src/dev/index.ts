@@ -1,4 +1,4 @@
-import { createSsrServer } from './server'
+import { createSsrServer } from './server.js'
 import { ViteDevServer } from 'vite'
 
 export const startServer = (options: Parameters<typeof createSsrServer>[0]) =>

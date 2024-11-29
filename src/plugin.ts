@@ -1,12 +1,12 @@
 import type { Plugin, UserConfig } from 'vite'
 import type { ViteSsrPluginOptions } from './config'
 import type { SsrOptions } from './dev/server'
-import { createSSRDevHandler } from './dev/server'
+import { createSSRDevHandler } from './dev/server.js'
 import { normalizePath } from 'vite'
 
 const pluginName = '@flowtools/vite-ssr'
-const entryServer = '/entry-server'
-const entryClient = '/entry-client'
+const entryServer = '/entry-server.js'
+const entryClient = '/entry-client.js'
 
 export default function ViteSsrPlugin(
   options: ViteSsrPluginOptions & SsrOptions = {}
@@ -91,7 +91,7 @@ export default function ViteSsrPlugin(
       load(id, options) {
         if (id.startsWith(`virtual:${nameToMatch}`)) {
           id = normalizePath(id)
-          let [, lib = ''] = id.split('/')
+          let [, , lib = ''] = id.split('/')
           if (lib === 'index.js') {
             lib = detectedLib
           }

@@ -27,7 +27,7 @@ if (command === 'build') {
     const { mode, ssr, watch } = options
     
     // Dynamic import for build
-    const { default: build } = await import('./build')
+    const { default: build } = await import('./build/index.js')
 
     await build({
       clientOptions: { mode, build: { watch } },

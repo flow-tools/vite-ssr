@@ -1,9 +1,9 @@
 import { createSSRApp } from 'vue'
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import createClientContext from '../core/entry-client.js'
-import { getFullPath, withoutSuffix } from '../utils/route'
-import { addPagePropsGetterToRoutes } from './utils'
-import type { ClientHandler, Context } from './types'
+import { getFullPath, withoutSuffix } from '../utils/route.js'
+import { addPagePropsGetterToRoutes } from './utils.js'
+import type { ClientHandler, Context } from './types.js'
 
 import { provideContext } from './components.js'
 export { ClientOnly, useContext } from './components.js'

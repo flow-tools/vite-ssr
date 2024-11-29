@@ -5,9 +5,9 @@ import {
   BrowserRouter,
   BrowserRouterProps,
   useNavigate,
-} from 'react-router-dom'
+} from 'react-router'
 import createClientContext from '../core/entry-client.js'
-import { withoutSuffix } from '../utils/route'
+import { withoutSuffix } from '../utils/route.js'
 import type { ClientHandler, Context } from './types'
 import { createRouter } from './utils'
 

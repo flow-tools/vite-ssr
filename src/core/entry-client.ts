@@ -1,5 +1,5 @@
-import { deserializeState } from '../utils/deserialize-state'
-import { useClientRedirect } from '../utils/response'
+import { deserializeState } from '../utils/deserialize-state.js'
+import { useClientRedirect } from '../utils/response.js'
 import type { ClientHandler, Context, Options } from './types'
 
 export const viteSSR: ClientHandler = async function viteSSR(options, hook) {

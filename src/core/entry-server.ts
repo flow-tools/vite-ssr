@@ -1,6 +1,6 @@
-import { createUrl } from '../utils/route'
-import { useSsrResponse } from '../utils/response'
-import { serializeState } from '../utils/serialize-state'
+import { createUrl } from '../utils/route.js'
+import { useSsrResponse } from '../utils/response.js'
+import { serializeState } from '../utils/serialize-state.js'
 import {
   buildHtmlDocument,
   findDependencies,

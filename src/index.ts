@@ -21,5 +21,5 @@ declare module '@flowtools/vite-ssr' {
 
   export default viteSSR
   export const ClientOnly: any
-  export const useContext: () => import('./utils/types').SharedContext
+  export const useContext: () => import('./utils/types.js').SharedContext
 }

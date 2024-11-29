@@ -1,3 +1,3 @@
-export * from './entry-client'
-export { default } from './entry-client'
+export * from './entry-client.js'
+export { default } from './entry-client.js'
 export type { Context } from './types'
