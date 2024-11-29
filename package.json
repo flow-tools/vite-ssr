@@ -1,28 +1,31 @@
 {
-  "name": "vite-ssr",
+  "name": "@flowtools/vite-ssr",
   "version": "0.17.2",
   "private": true,
   "description": "Vite utility for server side rendering",
   "main": "./index.js",
   "scripts": {
     "dev": "npm-run-all dev:* --parallel dev:watch:* ",
-    "dev:clean": "rm -rf node_modules/vite-ssr && mkdir node_modules/vite-ssr",
-    "dev:copy": "cp package.json node_modules/vite-ssr/",
-    "dev:watch:cjs": "cd src && yarn tsc --watch --incremental --outDir ./node_modules/vite-ssr",
-    "dev:watch:esm": "yarn dev:watch:cjs --project tsconfig-esm.json",
+    "dev:clean": "rm -rf node_modules/@flowtools(vite-ssr && mkdir -p node_modules/@flowtools/vite-ssr",
+    "dev:copy": "cp package.json node_modules/@flowtools(vite-ssr/",
+    "dev:watch:cjs": "cd src && pnpm tsc --watch --incremental --outDir ./node_modules/@flowtools/vite-ssr",
+    "dev:watch:esm": "pnpm dev:watch:cjs --project tsconfig-esm.json",
     "test": "uvu -r ts-node/register test/specs",
-    "test:watch": "watchlist src test -- yarn test",
-    "pretest": "run-s  \"build:compile:* --incremental --outDir ./node_modules/vite-ssr\" dev:copy",
+    "test:watch": "watchlist src test -- pnpm test",
+    "preinstall": "npx only-allow pnpm",
+    "pretest": "run-s  \"build:compile:* --incremental --outDir ./node_modules/@flowtools/vite-ssr\" dev:copy",
+    "prepublishOnly": "pnpm run build",
+    "release": "pnpm build && bumpp --commit --push --tag && pnpm publish",
     "build": "npm-run-all build:* --parallel build:compile:*",
     "build:clean": "rm -rf dist && mkdir dist",
     "build:copy": "cp README.md LICENSE dist/ && sed -e '/\"private\"/d' package.json > dist/package.json",
-    "build:compile:cjs": "cd src && yarn tsc",
-    "build:compile:esm": "cd src && yarn tsc --project tsconfig-esm.json",
+    "build:compile:cjs": "cd src && pnpm tsc",
+    "build:compile:esm": "cd src && pnpm tsc --project tsconfig-esm.json",
     "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frandiox/vite-ssr.git"
+    "url": "git+https://github.com/flowtools/vite-ssr.git"
   },
   "keywords": [
     "vite",
@@ -33,17 +36,11 @@
   "author": "Fran Dios",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/frandiox/vite-ssr/issues"
+    "url": "https://github.com/flowtools/vite-ssr/issues"
   },
-  "homepage": "https://github.com/frandiox/vite-ssr#readme",
+  "homepage": "https://github.com/flowtools/vite-ssr#readme",
   "bin": "./cli.js",
   "types": "./index.d.ts",
-  "workspaces": [
-    "examples/vue",
-    "examples/react",
-    "examples/react-apollo",
-    "test/fixtures/*"
-  ],
   "peerDependencies": {
     "@unhead/addons": "^1.11.13",
     "@unhead/ssr": "^1.11.13",
@@ -106,18 +103,27 @@
     "react-ssr-prepass": "^1.5.0"
   },
   "devDependencies": {
+    "@apollo/client": "^3.3.18",
+    "@emotion/cache": "11.13.5",
+    "@emotion/react": "11.13.5",
+    "@emotion/server": "11.11.0",
+    "@material-ui/core": "4.12.4",
     "@types/connect": "^3.4.34",
     "@types/express": "^5.0.0",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.10.1",
     "@types/react": "18.3.12",
     "@types/react-dom": "18.3.1",
+    "@unhead/schema": "^1.11.13",
+    "bumpp": "^9.8.1",
     "execa": "^9.5.1",
     "express": "^4.21.1",
     "fs-extra": "^11.2.0",
     "npm-run-all": "^4.1.5",
     "playwright-chromium": "^1.49.0",
     "prettier": "^3.4.1",
+    "react-router": "^7.0.1",
+    "rollup": "^4.27.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
     "uvu": "^0.5.1",
@@ -126,6 +132,5 @@
   },
   "gitHooks": {
     "commit-msg": "node scripts/verifyCommit.js"
-  },
-  "packageManager": "yarn@1.22.19"
+  }
 }

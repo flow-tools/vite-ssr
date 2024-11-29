@@ -1,4 +1,4 @@
-import { useContext } from 'vite-ssr/vue'
+import { useContext } from '@flowtools/vite-ssr/vue'
 import { useRoute } from 'vue-router'
 
 export async function useFetchRepos() {

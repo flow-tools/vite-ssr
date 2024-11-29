@@ -2,7 +2,7 @@ import './App.css'
 import React, { useState } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
 import logo from './logo.svg'
-import { ClientOnly } from 'vite-ssr'
+import { ClientOnly } from '@flowtools/vite-ssr'
 
 export default function App({ isClient, url, router, request }) {
   const baseUrl = isClient ? '' : url.origin

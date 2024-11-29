@@ -2,7 +2,7 @@
 // redirect to a specific implementation.
 
 // This is a generic mix of framework types
-declare module 'vite-ssr' {
+declare module '@flowtools/vite-ssr' {
   export const viteSSR: (
     App: any,
     options: import('./utils/types').SharedOptions & {

@@ -1,5 +1,5 @@
 import path from 'path'
-import execa from 'execa'
+import { execa } from 'execa'
 import http from 'http'
 import express from 'express'
 /**
@@ -11,7 +11,7 @@ async function serve(
   const srcDir = path.resolve(root)
 
   // build
-  await execa('yarn', ['build'], { cwd: srcDir })
+  await execa('pnpm', ['build'], { cwd: srcDir })
 
   // start prod server
   const app = await createServer(srcDir)

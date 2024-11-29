@@ -1,6 +1,6 @@
 const { defineConfig } = require('vite')
 const react = require('@vitejs/plugin-react')
-const viteSSR = require('vite-ssr/plugin')
+const viteSSR = require('@flowtools/plugin')
 const api = require('../node-server/api')
 
 module.exports = defineConfig({

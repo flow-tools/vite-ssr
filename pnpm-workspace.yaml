@@ -1,0 +1,5 @@
+packages:
+  - "examples/vue"
+  - "examples/react"
+  - "examples/react-apollo"
+  - "test/fixtures/*"

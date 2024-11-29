@@ -4,7 +4,7 @@ import type { SsrOptions } from './dev/server'
 import { createSSRDevHandler } from './dev/server'
 import { normalizePath } from 'vite'
 
-const pluginName = 'vite-ssr'
+const pluginName = '@flowtools/vite-ssr'
 const entryServer = '/entry-server'
 const entryClient = '/entry-client'
 

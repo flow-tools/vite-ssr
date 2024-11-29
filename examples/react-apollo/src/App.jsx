@@ -2,7 +2,7 @@ import './App.css'
 import React, { useState } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
 import logo from './logo.svg'
-import { ClientOnly } from 'vite-ssr'
+import { ClientOnly } from '@flowtools/vite-ssr'
 import { ApolloClient, ApolloProvider, createHttpLink } from '@apollo/client'
 
 export default function App({ isClient, url, router, apolloCache }) {

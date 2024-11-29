@@ -49,7 +49,7 @@ Add Vite SSR plugin to your Vite config file (see [`vite.config.js`](./examples/
 ```js
 // vite.config.js
 import vue from '@vitejs/plugin-vue'
-import viteSSR from 'vite-ssr/plugin.js'
+import viteSSR from '@flowtools/plugin.js'
 // import react from '@vitejs/plugin-react'
 
 export default {
@@ -65,8 +65,8 @@ Then, simply import the main Vite SSR handler in your main entry file as follows
 ```js
 import App from './App' // Vue or React main app
 import routes from './routes'
-import viteSSR from 'vite-ssr'
-// or from 'vite-ssr/vue' or 'vite-ssr/react', which slightly improves typings
+import viteSSR from '@flowtools/vite-ssr'
+// or from '@flowtools/vite-ssr/vue' or '@flowtools/react', which slightly improves typings
 
 export default viteSSR(App, { routes }, (context) => {
   /* Vite SSR main hook for custom logic */
@@ -114,7 +114,7 @@ The context passed to the main hook (and to React's root component) contains:
 This context can also be accesed from any component by using `useContext` hook:
 
 ```js
-import { useContext } from 'vite-ssr'
+import { useContext } from '@flowtools/vite-ssr'
 
 //...
 function() {
@@ -186,7 +186,7 @@ export default viteSSR(App, { routes }, async ({ app }) => {
 - Calling your API directly from Vue components using [`Suspense`](https://v3.vuejs.org/guide/migration/suspense.html), and storing the result in the SSR initial state. See a full example with `Suspense` [here](./examples/vue/src/pages/Homepage.vue). If you prefer Axios, there's also an example [here](https://github.com/frandiox/vite-ssr/discussions/66).
 
 ```js
-import { useContext } from 'vite-ssr'
+import { useContext } from '@flowtools/vite-ssr'
 import { useRoute } from 'vue-router'
 import { inject, ref } from 'vue'
 
@@ -335,7 +335,7 @@ function App({ router }) {
 Vite SSR simply uses `JSON.stringify` to serialize the state, escapes certain characters to prevent XSS and saves it in the DOM. This behavior can be overriden by using the `transformState` hook in case you need to support dates, regexp or function serialization:
 
 ```js
-import viteSSR from 'vite-ssr'
+import viteSSR from '@flowtools/vite-ssr'
 import App from './app'
 import routes from './routes'
 
@@ -396,7 +396,7 @@ Beware that, in development, Vite uses plain Node.js + Connect for middleware. T
 It's possible to set status and headers to the response with `writeResponse` utility. For redirects, the `redirect` utility works both in SSR (server redirect) and browser (history push):
 
 ```js
-import { useContext } from 'vite-ssr'
+import { useContext } from '@flowtools/vite-ssr'
 
 // In a component
 function () {
@@ -434,7 +434,7 @@ yarn add unhead @unhead/vue @unhead/ssr @unhead/addons
 
 ```js
 import { defineConfig } from 'vite'
-import viteSSR from 'vite-ssr/plugin'
+import viteSSR from '@flowtools/plugin'
 import UnheadVite from '@unhead/addons/vite'
 import Vue from '@vitejs/plugin-vue'
 
@@ -493,7 +493,7 @@ import { Helmet } from 'react-helmet-async'
 Vite SSR exports `ClientOnly` component that renders its children only in the browser:
 
 ```jsx
-import { ClientOnly } from 'vite-ssr'
+import { ClientOnly } from '@flowtools/vite-ssr'
 
 //...
 ;<div>
@@ -518,7 +518,7 @@ If you want to run your own dev server (e.g. Express.js) instead of Vite's defau
 
 ```js
 const express = require('express')
-const { createSsrServer } = require('vite-ssr/dev')
+const { createSsrServer } = require('@flowtools/dev')
 
 async function createServer() {
   const app = express()
@@ -573,8 +573,8 @@ Common integrations will be added here:
 Use the `styleCollector` option to specify an SSR style collector. `vite-ssr` exports 3 common CSS-in-JS integrations: `styled-components`, `material-ui-core-v4` and `emotion`:
 
 ```js
-import viteSSR from 'vite-ssr/react'
-import styleCollector from 'vite-ssr/react/style-collectors/emotion'
+import viteSSR from '@flowtools/react'
+import styleCollector from '@flowtools/react/style-collectors/emotion'
 
 export default viteSSR(App, { routes, styleCollector })
 ```
@@ -591,7 +591,7 @@ Example transforming `request` and `response` to types of `express`:
 ```ts
 import { Request, Response } from 'express'
 
-declare module 'vite-ssr/vue' {
+declare module '@flowtools/vite-ssr/vue' {
   export interface Context {
     request: Request
     response: Response

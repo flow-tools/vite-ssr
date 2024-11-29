@@ -1,5 +1,5 @@
 import './index.css'
-import viteSSR from 'vite-ssr/core/entry-client'
+import viteSSR from '@flowtools/core/entry-client'
 
 export default viteSSR((context) => {
   const { initialState } = context

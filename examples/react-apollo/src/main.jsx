@@ -1,6 +1,6 @@
 import App from './App'
 import { routes } from './routes'
-import viteSSR from 'vite-ssr'
+import viteSSR from '@flowtools/vite-ssr'
 import { InMemoryCache } from '@apollo/client'
 
 export default viteSSR(App, { routes }, (context) => {

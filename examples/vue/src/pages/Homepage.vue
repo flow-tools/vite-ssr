@@ -10,7 +10,7 @@
 <script>
 import { defineComponent, inject, ref } from 'vue'
 import { useHead } from '@unhead/vue'
-import { useContext } from 'vite-ssr/vue'
+import { useContext } from '@flowtools/vite-ssr/vue'
 
 export default defineComponent({
   name: 'Homepage',

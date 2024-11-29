@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import viteSSR from 'vite-ssr/plugin'
+import viteSSR from '@flowtools/plugin'
 import { api } from '../node-server/api'
 
 export default defineConfig({

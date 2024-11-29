@@ -1,5 +1,5 @@
 const { defineConfig } = require('vite')
-const viteSSR = require('vite-ssr/plugin')
+const viteSSR = require('@flowtools/plugin')
 const vue = require('@vitejs/plugin-vue')
 const api = require('../node-server/api')
 const UnheadVite = require('@unhead/addons/vite')
