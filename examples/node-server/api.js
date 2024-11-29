@@ -1,7 +1,7 @@
 // Example API
 
 // By default it tries to import from /index.mjs
-const { buildSchema, graphql } = require('graphql/index.js')
+import { buildSchema, graphql } from 'graphql/index.js'
 
 const schema = buildSchema(`
   type Hello {
@@ -30,7 +30,6 @@ const parseBody = (req) => {
     })
 
     req.on('end', () => {
-      let bodyJs = {}
       try {
         resolve(JSON.parse(body))
       } catch (error) {
@@ -40,7 +39,7 @@ const parseBody = (req) => {
   })
 }
 
-module.exports = [
+export const api = [
   {
     route: '/api/getProps',
     method: 'get',
@@ -76,3 +75,5 @@ module.exports = [
     },
   },
 ]
+
+export default api

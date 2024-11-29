@@ -1,11 +1,11 @@
 import type { App, Component } from 'vue'
 import type {
-  RouteLocationNormalized,
+  RouteLocationResolvedGeneric,
   RouteLocationRaw,
   RouterOptions,
   Router,
 } from 'vue-router'
-import type { HeadClient } from '@vueuse/head'
+import type { Unhead } from '@unhead/schema'
 import type {
   Meta,
   Renderer,
@@ -18,7 +18,7 @@ export type ExtendedRouteRaw = RouteLocationRaw & {
   meta?: Meta
 }
 
-export type ExtendedRouteNormalized = RouteLocationNormalized & {
+export type ExtendedRouteNormalized = RouteLocationResolvedGeneric & {
   props?: any
   meta?: Meta
 }
@@ -29,7 +29,7 @@ export interface Options extends SharedOptions {
 }
 
 type HookResponse = void | {
-  head?: HeadClient
+  head?: Unhead<any>
 }
 
 export interface Context extends SharedContext {}
@@ -37,7 +37,7 @@ export interface Context extends SharedContext {}
 export interface HookParams extends Context {
   app: App
   router: Router
-  initialRoute: RouteLocationNormalized
+  initialRoute: RouteLocationResolvedGeneric
 }
 
 export interface Hook {

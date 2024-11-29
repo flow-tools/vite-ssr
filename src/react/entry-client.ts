@@ -77,7 +77,7 @@ export const viteSSR: ClientHandler = async function (
 
     styles && styles.cleanup && styles.cleanup()
 
-    if (__DEV__) {
+    if (__VITE_SSR_DEV__) {
       const root = createRoot(el)
       root.render(app)
     } else {

@@ -29,25 +29,49 @@ export function renderPreloadLinks(files: string[]) {
 
 // @ts-ignore
 const containerId = __CONTAINER_ID__ as string
+// @ts-ignore
+const bodyTeleportsId = __BODY_TELEPORTS_ID__ as string
 
 const containerRE = new RegExp(
   `<div id="${containerId}"([\\s\\w\\-"'=[\\]]*)><\\/div>`
 )
 
+
+const bodyTagsOpenRE = new RegExp(`(${containerRE.source})`)
+
+const bodyTeleportsRE = new RegExp(
+  `<div id="${bodyTeleportsId}"([\\s\\w\\-"'=[\\]]*)><\\/div>`
+)
+
+
 type DocParts = {
+  headTags?: string
+  bodyTags?: string
+  bodyTagsOpen?: string
   htmlAttrs?: string
   bodyAttrs?: string
-  headTags?: string
+  bodyPrepend?: string
+  bodyTeleports?: string
   body?: string
   initialState?: string
 }
 
 export function buildHtmlDocument(
   template: string,
-  { htmlAttrs, bodyAttrs, headTags, body, initialState }: DocParts
+  {
+    headTags,
+    bodyTags,
+    bodyTagsOpen,
+    bodyPrepend,
+    bodyTeleports,
+    htmlAttrs,
+    bodyAttrs,
+    body,
+    initialState,
+  }: DocParts
 ) {
   // @ts-ignore
-  if (__DEV__) {
+  if (__VITE_SSR_DEV__) {
     if (template.indexOf(`id="${containerId}"`) === -1) {
       console.warn(
         `[SSR] Container with id "${containerId}" was not found in index.html`
@@ -59,8 +83,25 @@ export function buildHtmlDocument(
     template = template.replace('<html', `<html ${htmlAttrs} `)
   }
 
+  if (bodyTagsOpen) {
+    template = template.replace(bodyTagsOpenRE, `${bodyTagsOpen} $1`)
+  }
+
   if (bodyAttrs) {
     template = template.replace('<body', `<body ${bodyAttrs} `)
+  }
+
+  if (bodyTags) {
+    template = template.replace('</body>', `${bodyTags}</body>`)
+  }
+
+  if (bodyTeleports) {
+    if (template.indexOf(`id="${bodyTeleportsId}"`) === -1) {
+      bodyPrepend = `${bodyPrepend || ''}\n<div id="${bodyTeleportsId}" data-server-rendered="true">${bodyTeleports || ''}</div>\n`;
+    } else {
+      template = template.replace(bodyTeleportsRE,
+        (_, d1) => `<div id="${bodyTeleportsId}" data-server-rendered="true"${d1 || ''}>${bodyTeleports || ''}</div>\n`);
+    }
   }
 
   if (headTags) {
@@ -72,7 +113,7 @@ export function buildHtmlDocument(
     // Use function parameter here to avoid replacing `$1` in body or initialState.
     // https://github.com/frandiox/vite-ssr/issues/123
     (_, d1) =>
-      `<div id="${containerId}" data-server-rendered="true"${d1 || ''}>${
+      `${bodyPrepend || ''}<div id="${containerId}" data-server-rendered="true"${d1 || ''}>${
         body || ''
       }</div>\n\n  <script>window.__INITIAL_STATE__=${
         initialState || "'{}'"
