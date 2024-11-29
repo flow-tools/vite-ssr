@@ -16,7 +16,7 @@ import type {
   OutputOptions,
 } from 'rollup'
 
-export = async (
+export default async (
   inlineBuildOptions: BuildOptions = {},
   _viteConfig?: ResolvedConfig
 ) =>

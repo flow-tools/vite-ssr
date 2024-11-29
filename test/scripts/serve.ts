@@ -14,7 +14,7 @@ async function serve(
   await execa('yarn', ['build'], { cwd: srcDir })
 
   // start prod server
-  const app = createServer(srcDir)
+  const app = await createServer(srcDir)
 
   return new Promise((resolve, reject) => {
     try {
@@ -35,7 +35,7 @@ export default serve
 
 // This is a simple Node server that uses the built project.
 
-function createServer(projectPath: string) {
+async function createServer(projectPath: string) {
   global.fetch = require('node-fetch')
   // This contains a list of static routes (assets)
   const { ssr } = require(path.join(projectPath, 'dist/server/package.json'))
@@ -43,11 +43,22 @@ function createServer(projectPath: string) {
   // The manifest is required for preloading assets
   const manifest = require(path.join(
     projectPath,
-    'dist/client/ssr-manifest.json'
+    'dist/client/.vite/ssr-manifest.json'
   ))
 
   // This is the server renderer we just built
-  const { default: renderPage } = require(path.join(projectPath, 'dist/server'))
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  console.log('projectPath', projectPath)
+  const { default: renderPage } = await import(path.join(projectPath, 'dist/server'))
 
   const server = express()
 

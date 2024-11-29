@@ -62,6 +62,7 @@ export function buildHtmlDocument(
     headTags,
     bodyTags,
     bodyTagsOpen,
+    bodyPrepend,
     bodyTeleports,
     htmlAttrs,
     bodyAttrs,

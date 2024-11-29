@@ -8,7 +8,7 @@ const pluginName = 'vite-ssr'
 const entryServer = '/entry-server'
 const entryClient = '/entry-client'
 
-export = function ViteSsrPlugin(
+export default function ViteSsrPlugin(
   options: ViteSsrPluginOptions & SsrOptions = {}
 ) {
   let detectedLib: 'core' | 'vue' | 'react'

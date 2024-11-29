@@ -1,9 +1,8 @@
-const { defineConfig } = require('vite')
-const react = require('@vitejs/plugin-react')
-const viteSSR = require('vite-ssr/plugin')
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import viteSSR from 'vite-ssr/plugin'
 
-// https://vitejs.dev/config/
-module.exports = defineConfig({
+export default defineConfig({
   ssr: { format: 'cjs' },
   plugins: [
     viteSSR({
@@ -14,7 +13,6 @@ module.exports = defineConfig({
         reactApolloRenderer: false,
       },
     }),
-    ,
     react(),
   ],
 })

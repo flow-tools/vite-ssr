@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
+import { performance } from 'node:perf_hooks'
 // @ts-ignore
 if (!globalThis.__ssr_start_time) {
-  const { performance } = require('perf_hooks')
   // @ts-ignore
   globalThis.__ssr_start_time = performance.now()
 }
@@ -23,11 +23,11 @@ for (let i = 0; i < args.length; i++) {
 const [command] = args
 
 if (command === 'build') {
-  // @ts-ignore
-  const build = require('./build')
-
   ;(async () => {
     const { mode, ssr, watch } = options
+    
+    // Dynamic import for build
+    const { default: build } = await import('./build')
 
     await build({
       clientOptions: { mode, build: { watch } },
@@ -43,7 +43,8 @@ if (command === 'build') {
   command === undefined ||
   command.startsWith('-')
 ) {
-  require('./dev').startServer(options)
+  // Dynamic import for dev
+  import('./dev').then(({ startServer }) => startServer(options))
 } else {
   console.log(`Command "${command}" not supported`)
 }
