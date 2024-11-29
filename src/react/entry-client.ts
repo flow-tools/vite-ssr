@@ -36,7 +36,11 @@ export const viteSSR: ClientHandler = async function (
     url,
     spaRedirect: (location) => {
       const navigate = useNavigate()
-      React.useEffect(() => navigate(location), [navigate])
+      React.useEffect(() => {
+        (async () => {
+          await navigate(location)
+        })()
+      }, [navigate])
     },
   })
 
@@ -76,7 +80,7 @@ export const viteSSR: ClientHandler = async function (
     const el = document.getElementById(__CONTAINER_ID__)!
 
     styles && styles.cleanup && styles.cleanup()
-
+    // @ts-ignore
     if (__VITE_SSR_DEV__) {
       const root = createRoot(el)
       root.render(app)

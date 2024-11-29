@@ -47,17 +47,6 @@ async function createServer(projectPath: string) {
   ))
 
   // This is the server renderer we just built
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
-  console.log('projectPath', projectPath)
   const { default: renderPage } = await import(path.join(projectPath, 'dist/server'))
 
   const server = express()

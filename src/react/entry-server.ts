@@ -1,7 +1,7 @@
 import React, { ReactElement } from 'react'
 import { renderToString } from 'react-dom/server'
 import { HelmetProvider } from 'react-helmet-async'
-import { StaticRouter, StaticRouterProps } from 'react-router-dom/server'
+import { StaticRouter, StaticRouterProps } from 'react-router'
 import ssrPrepass from 'react-ssr-prepass'
 import coreViteSSR from '../core/entry-server.js'
 import { getFullPath, withoutSuffix } from '../utils/route'
