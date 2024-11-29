@@ -1,6 +1,13 @@
 <p align="center">
   <img width="180" src="./logo.svg" alt="Vite SSR logo">
 </p>
+# FORKED FROM [Vite SSR](https://github.com/frandiox/vite-ssr)
+
+Changed in this fork:
+
+- unhead
+- esm
+- pnpm
 
 # Vite SSR
 
@@ -40,7 +47,7 @@ Make sure that `index.html` contains a root element with id `app`: `<div id="app
 
 ### Vue Body Teleports
 
-Make sure that `index.html` contains a root element with id `body-teleports`: `<div id="body-teleports"></div>` (or change the default body teleports id in plugin options: `options.bodyTeleportsId`).
+Make sure that `index.html` contains a root element with id `teleports`: `<div id="teleports"></div>` (or change the default body teleports id in plugin options: `options.bodyTeleportsId`).
 
 ## Usage
 
