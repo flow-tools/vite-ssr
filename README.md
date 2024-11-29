@@ -3,11 +3,18 @@
 </p>
 # FORKED FROM [Vite SSR](https://github.com/frandiox/vite-ssr)
 
+I use this with vue, so react might not work. Use at your own risk.
+
 Changed in this fork:
 
 - unhead
 - esm
 - pnpm
+
+❗️ Not working yet
+
+- test don't run
+- react is not tested at all
 
 # Vite SSR
 
