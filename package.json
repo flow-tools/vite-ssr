@@ -1,6 +1,6 @@
 {
   "name": "@flowtools/vite-ssr",
-  "version": "0.18.0",
+  "version": "0.18.1",
   "description": "Vite utility for server side rendering",
   "main": "./index.js",
   "scripts": {
