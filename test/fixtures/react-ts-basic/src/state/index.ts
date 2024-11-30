@@ -1,5 +1,5 @@
 import { Dispatch, useState } from 'react'
-import { useContext } from '@flowtools/react'
+import { useContext } from '@flowtools/vite-ssr/react'
 
 const isLoading: Record<string, boolean> = {}
 

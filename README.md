@@ -63,7 +63,7 @@ Add Vite SSR plugin to your Vite config file (see [`vite.config.js`](./examples/
 ```js
 // vite.config.js
 import vue from '@vitejs/plugin-vue'
-import viteSSR from '@flowtools/plugin.js'
+import viteSSR from '@flowtools/vite-ssr/plugin.js'
 // import react from '@vitejs/plugin-react'
 
 export default {
@@ -80,7 +80,7 @@ Then, simply import the main Vite SSR handler in your main entry file as follows
 import App from './App' // Vue or React main app
 import routes from './routes'
 import viteSSR from '@flowtools/vite-ssr'
-// or from '@flowtools/vite-ssr/vue' or '@flowtools/react', which slightly improves typings
+// or from '@flowtools/vite-ssr/vue' or '@flowtools/vite-ssr/react', which slightly improves typings
 
 export default viteSSR(App, { routes }, (context) => {
   /* Vite SSR main hook for custom logic */
@@ -448,7 +448,7 @@ yarn add unhead @unhead/vue @unhead/ssr @unhead/addons
 
 ```js
 import { defineConfig } from 'vite'
-import viteSSR from '@flowtools/plugin'
+import viteSSR from '@flowtools/vite-ssr/plugin'
 import UnheadVite from '@unhead/addons/vite'
 import Vue from '@vitejs/plugin-vue'
 
@@ -532,7 +532,7 @@ If you want to run your own dev server (e.g. Express.js) instead of Vite's defau
 
 ```js
 const express = require('express')
-const { createSsrServer } = require('@flowtools/dev')
+const { createSsrServer } = require('@flowtools/vite-ssr/dev')
 
 async function createServer() {
   const app = express()
@@ -587,8 +587,8 @@ Common integrations will be added here:
 Use the `styleCollector` option to specify an SSR style collector. `vite-ssr` exports 3 common CSS-in-JS integrations: `styled-components`, `material-ui-core-v4` and `emotion`:
 
 ```js
-import viteSSR from '@flowtools/react'
-import styleCollector from '@flowtools/react/style-collectors/emotion'
+import viteSSR from '@flowtools/vite-ssr/react'
+import styleCollector from '@flowtools/vite-ssr/react/style-collectors/emotion'
 
 export default viteSSR(App, { routes, styleCollector })
 ```

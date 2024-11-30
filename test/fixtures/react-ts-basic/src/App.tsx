@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, Routes, Route } from 'react-router-dom'
-import { Context } from '@flowtools/react'
+import { Context } from '@flowtools/vite-ssr/react'
 
 export default function ({ router }: Context) {
   const [count, setCount] = useState(0)

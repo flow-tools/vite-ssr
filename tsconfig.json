@@ -13,6 +13,8 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": false,
+    "declaration": true,
+    "declarationMap": false,
     "stripInternal": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,

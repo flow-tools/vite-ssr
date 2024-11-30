@@ -4,7 +4,7 @@ import type { Context } from '../types'
 
 const key = 'jss-server-side'
 
-function ssrCollector(context: Context) {
+function ssrCollector(context: Context): { collect: (app: ReactElement) => ReactElement; toString: () => string } {
   const sheet = new ServerStyleSheets()
 
   return {
