@@ -1,9 +1,11 @@
 <p align="center">
   <img width="180" src="./logo.svg" alt="Vite SSR logo">
 </p>
+
 # FORKED FROM [Vite SSR](https://github.com/frandiox/vite-ssr)
 
 I use this with vue, so react might not work. Use at your own risk.
+Use nuxt, not this if unsure. I'm just avoiding a rewrite of a project that is heavily integraded with a express backend.
 
 Changed in this fork:
 
@@ -37,17 +39,17 @@ Start a new SSR project right away with filesystem routes, i18n, icons, markdown
 Create a normal [Vite](https://vitejs.dev/guide/) project for Vue or React.
 
 ```sh
-yarn create vite --template [vue|vue-ts|react|react-ts]
+pnpm create vite --template [vue|vue-ts|react|react-ts]
 ```
 
 Then, add `vite-ssr` with your package manager (direct dependency) and your framework router.
 
 ```sh
 # For Vue
-yarn add vite-ssr vue@3 vue-router@4 @vueuse/head@^0.9.0
+pnpm add @flowtools/vite-ssr vue vue-router @unhead/vue
 
 # For React
-yarn add vite-ssr react@16 react-router-dom@5
+pnpm add @flowtools/vite-ssr react react-router-dom
 ```
 
 Make sure that `index.html` contains a root element with id `app`: `<div id="app"></div>` (or change the default container id in plugin options: `options.containerId`).
