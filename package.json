@@ -2,11 +2,12 @@
   "name": "@flowtools/vite-ssr",
   "version": "0.18.3",
   "description": "Vite utility for server side rendering",
+  "type": "module",
   "main": "./index.js",
   "scripts": {
     "dev": "npm-run-all dev:* --parallel dev:watch:* ",
-    "dev:clean": "rm -rf node_modules/@flowtools(vite-ssr && mkdir -p node_modules/@flowtools/vite-ssr",
-    "dev:copy": "cp package.json node_modules/@flowtools(vite-ssr/",
+    "dev:clean": "rm -rf node_modules/@flowtools/vite-ssr && mkdir -p node_modules/@flowtools/vite-ssr",
+    "dev:copy": "cp package.json node_modules/@flowtools/vite-ssr/",
     "dev:watch:cjs": "cd src && pnpm tsc --watch --incremental --outDir ./node_modules/@flowtools/vite-ssr",
     "dev:watch:esm": "pnpm dev:watch:cjs --project tsconfig-esm.json",
     "test": "uvu -r ts-node/register test/specs",
@@ -18,8 +19,8 @@
     "build": "npm-run-all build:* --parallel build:compile:*",
     "build:clean": "rm -rf dist && mkdir dist",
     "build:copy": "cp README.md LICENSE dist/ && sed -e '/\"private\"/d' package.json > dist/package.json",
-    "build:compile:cjs": "cd src && pnpm tsc",
-    "build:compile:esm": "cd src && pnpm tsc --project tsconfig-esm.json",
+    "build:compile:cjs": "cd src && pnpm tsc && pnpm tsc-alias",
+    "build:compile:esm": "cd src && pnpm tsc --project tsconfig-esm.json && pnpm tsc-alias",
     "format": "prettier --write ."
   },
   "repository": {
@@ -126,6 +127,7 @@
     "prettier": "^3.4.1",
     "react-router": "^7.0.1",
     "rollup": "^4.27.4",
+    "tsc-alias": "^1.8.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
     "uvu": "^0.5.1",
