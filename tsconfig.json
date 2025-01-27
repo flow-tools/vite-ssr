@@ -21,6 +21,10 @@
     "noFallthroughCasesInSwitch": false,
     "removeComments": false
   },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "verbose": false
+  },
   "include": ["./src"],
   "exclude": ["./src/vue/*", "./src/react/*", "./src/utils/*"]
 }

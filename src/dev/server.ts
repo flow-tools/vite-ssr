@@ -8,6 +8,7 @@ import {
   InlineConfig,
   ViteDevServer,
   ServerOptions,
+  version,
 } from 'vite'
 import chalk from 'chalk'
 import { getEntryPoint, getPluginOptions } from '../config.js'
@@ -208,7 +209,7 @@ export function printServerInfo(server: ViteDevServer) {
 
   if (Object.prototype.hasOwnProperty.call(server, 'printUrls')) {
     info(
-      chalk.cyan(`\n  vite v${require('vite/package.json').version}`) +
+      chalk.cyan(`\n  vite v${version}`) +
         chalk.green(` dev server running at:\n`),
       { clear: !server.config.logger.hasWarned }
     )
