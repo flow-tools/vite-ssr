@@ -25,11 +25,12 @@ export function createUrl(urlLike: string | URL | Location) {
 
 export function getFullPath(url: string | URL | Location, routeBase?: string) {
   url = createUrl(url)
-  url.pathname = withSuffix(url.pathname, S)
+  // url.pathname = withSuffix(url.pathname, S) - I don't think we should change the url.pathname
   let fullPath = withoutPrefix(url.href, url.origin)
 
   if (routeBase) {
-    routeBase = withSuffix(withPrefix(routeBase, S), S)
+    // routeBase = withSuffix(withPrefix(routeBase, S), S)
+    routeBase = withPrefix(routeBase, S)
     if (fullPath.indexOf(routeBase) === 0) {
       fullPath = withPrefix(fullPath.replace(routeBase, ''), S)
     }
