@@ -33,17 +33,17 @@ export const createSSRDevHandler = (
   server: ViteDevServer,
   options: SsrOptions = {}
 ) => {
-  // Fix, because newer versions of vite's inlineConfig contains "ssr" property which type is object
-  let { ssr, ...otherOptions } = server.config.inlineConfig as InlineConfig & {
-    ssr?: InlineConfig['ssr'] | string
-  }
-
-  if (typeof ssr != 'string') {
-    ssr = undefined
-  }
+  // CLI flags arrive in the inline config. Its `ssr` is Vite's SSR
+  // options; the CLI's `--ssr <file>` is `ssrEntry` (see createSsrServer).
+  const {
+    ssr: _viteSsrOptions,
+    ssrEntry,
+    ...otherOptions
+  } = server.config.inlineConfig as InlineConfig & { ssrEntry?: string }
 
   options = {
-    ...{ ssr, ...otherOptions }, // CLI flags
+    ...otherOptions, // CLI flags
+    ssr: ssrEntry,
     ...options,
   }
 
@@ -156,8 +156,13 @@ export const createSSRDevHandler = (
 
 export async function createSsrServer({
   force,
+  ssr,
   ...options
-}: InlineConfig & { polyfills?: boolean; force?: boolean } = {}) {
+}: Omit<InlineConfig, 'ssr'> & {
+  polyfills?: boolean
+  force?: boolean
+  ssr?: InlineConfig['ssr'] | string
+} = {}) {
   // Enable SSR in the plugin
   process.env.__DEV_MODE_SSR = 'true'
 
@@ -168,8 +173,12 @@ export async function createSsrServer({
 
   const viteServer = await createViteServer({
     ...options,
+    // A string is the CLI's `--ssr <file>`, the SSR entry file. Vite
+    // fails on a string as its `ssr` options, so it travels as
+    // `ssrEntry` to createSSRDevHandler.
+    ...(typeof ssr === 'string' ? { ssrEntry: ssr } : { ssr }),
     server: options.server || ({ ...options } as ServerOptions),
-  })
+  } as InlineConfig)
 
   if (options.polyfills !== false) {
     if (!globalThis.fetch) {
