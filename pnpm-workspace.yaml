@@ -3,3 +3,9 @@ packages:
   - "examples/react"
   - "examples/react-apollo"
   - "test/fixtures/*"
+
+# Dependencies allowed to run install scripts (pnpm 10+ skips them otherwise)
+allowBuilds:
+  esbuild: true
+  playwright-chromium: true
+  yorkie: true

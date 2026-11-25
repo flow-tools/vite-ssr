@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
-import { renderToString } from '@vue/server-renderer'
+// From `vue` itself, so the renderer always matches the app's Vue version
+import { renderToString } from 'vue/server-renderer'
 import { createRouter, createMemoryHistory, RouteRecordRaw } from 'vue-router'
 import { getFullPath, withoutSuffix } from '../utils/route.js'
 import { addPagePropsGetterToRoutes } from './utils.js'
