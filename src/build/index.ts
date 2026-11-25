@@ -9,12 +9,7 @@ import {
   resolveViteConfig,
   BuildOptions,
 } from '../config.js'
-import type {
-  RollupOutput,
-  RollupWatcher,
-  OutputAsset,
-  OutputOptions,
-} from 'rollup'
+import type { RollupOutput, OutputAsset, OutputOptions } from 'rollup'
 
 export default async (
   inlineBuildOptions: BuildOptions = {},
@@ -103,42 +98,36 @@ export default async (
 
     const clientResult = await build(clientBuildOptions)
 
-    const isWatching = Object.prototype.hasOwnProperty.call(
-      clientResult,
-      '_maxListeners'
-    )
-
-    if (isWatching) {
-      // This is a build watcher
-      const watcher = clientResult
+    // With `build.watch`, Vite returns a watcher instead of the output:
+    // Rollup's (Vite 6/7) or Rolldown's (Vite 8). Both have `on`.
+    if ('on' in clientResult) {
       let resolved = false
 
-      // @ts-ignore
-      watcher.on('event', async ({ result }) => {
-        if (result) {
-          // This piece runs everytime there is
-          // an updated frontend bundle.
-          result.close()
+      clientResult.on('event', async (event) => {
+        // Vite itself closes `event.result` and logs build errors.
+        if (event.code !== 'BUNDLE_END') return
 
-          // Re-read the index.html in case it changed.
-          // This content is not included in the virtual bundle.
-          indexHtmlTemplate = await fs.readFile(
-            (clientBuildOptions.build?.outDir as string) + `/${INDEX_HTML}`,
-            'utf-8'
-          )
+        // This piece runs everytime there is
+        // an updated frontend bundle.
 
-          // Build SSR bundle with the new index.html
-          await build(serverBuildOptions)
-          await generatePackageJson(
-            viteConfig,
-            clientBuildOptions,
-            serverBuildOptions
-          )
+        // Re-read the index.html in case it changed.
+        // This content is not included in the virtual bundle.
+        indexHtmlTemplate = await fs.readFile(
+          (clientBuildOptions.build?.outDir as string) + `/${INDEX_HTML}`,
+          'utf-8'
+        )
 
-          if (!resolved) {
-            resolve(null)
-            resolved = true
-          }
+        // Build SSR bundle with the new index.html
+        await build(serverBuildOptions)
+        await generatePackageJson(
+          viteConfig,
+          clientBuildOptions,
+          serverBuildOptions
+        )
+
+        if (!resolved) {
+          resolve(null)
+          resolved = true
         }
       })
     } else {
