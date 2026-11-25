@@ -1,8 +1,11 @@
 // This is a simple Node server that uses the built project.
+// Usage: node index.js <example>  (or `pnpm serve:node` in an example)
 
-global.fetch = require('node-fetch')
-const path = require('path')
-const express = require('express')
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import express from 'express'
+import { api } from './api.js'
 
 const example = process.argv[2]
 
@@ -10,27 +13,26 @@ if (!example) {
   throw new Error('Specify example name in the first argument')
 }
 
-const dist = `../${example}/dist`
+const dist = fileURLToPath(new URL(`../${example}/dist/`, import.meta.url))
+const readJson = (file) =>
+  JSON.parse(fs.readFileSync(path.join(dist, file), 'utf-8'))
 
-// This contains a list of static routes (assets)
-const { ssr } = require(`${dist}/server/package.json`)
+// This contains the entry file and a list of static routes (assets)
+const { main, ssr } = readJson('server/package.json')
 
 // The manifest is required for preloading assets
-const manifest = require(`${dist}/client/.vite/ssr-manifest.json`)
+const manifest = readJson('client/.vite/ssr-manifest.json')
 
 // This is the server renderer we just built
-const { default: renderPage } = require(`${dist}/server`)
-
-const api = require('./api')
+const { default: renderPage } = await import(
+  pathToFileURL(path.join(dist, 'server', main)).href
+)
 
 const server = express()
 
 // Serve every static asset route
 for (const asset of ssr.assets || []) {
-  server.use(
-    '/' + asset,
-    express.static(path.join(__dirname, `${dist}/client/` + asset))
-  )
+  server.use('/' + asset, express.static(path.join(dist, 'client', asset)))
 }
 
 // Custom API to get data for each page
@@ -40,7 +42,7 @@ api.forEach(({ route, handler, method = 'get' }) =>
 )
 
 // Everything else is treated as a "rendering request"
-server.get('*', async (request, response) => {
+server.use(async (request, response) => {
   const url =
     request.protocol + '://' + request.get('host') + request.originalUrl
 
@@ -58,6 +60,6 @@ server.get('*', async (request, response) => {
   response.end(html)
 })
 
-const port = 8080
+const port = process.env.PORT || 8080
 console.log(`Server started: http://localhost:${port}`)
 server.listen(port)

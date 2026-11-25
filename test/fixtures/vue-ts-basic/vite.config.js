@@ -4,6 +4,5 @@ import viteSSR from '@flowtools/vite-ssr/plugin'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  ssr: { format: 'cjs' },
   plugins: [viteSSR(), vue()],
 })

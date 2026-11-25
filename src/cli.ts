@@ -44,7 +44,7 @@ if (command === 'build') {
   command.startsWith('-')
 ) {
   // Dynamic import for dev
-  import('./dev').then(({ startServer }) => startServer(options))
+  import('./dev/index.js').then(({ startServer }) => startServer(options))
 } else {
   console.log(`Command "${command}" not supported`)
 }

@@ -1,7 +1,6 @@
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 import { setup, reset } from '../../setup/per-suite'
-import fetch from 'node-fetch'
 
 const FIXTURE = 'react-ts-basic'
 
@@ -26,6 +25,8 @@ test(`${FIXTURE}/home`, async (context) => {
   await context.page.click('button')
   assert.is(normalize(await context.page.textContent('button')), 'Count:1')
   await context.page.click('a[href="/about"]')
+  // React Router keeps the old page during the transition to the lazy route
+  await context.page.waitForSelector('h1:has-text("About Page")')
   assert.is(await context.page.textContent('h1'), 'About Page')
   assert.is(normalize(await context.page.textContent('button')), 'Count:1')
 })

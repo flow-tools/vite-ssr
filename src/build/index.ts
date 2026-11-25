@@ -9,12 +9,7 @@ import {
   resolveViteConfig,
   BuildOptions,
 } from '../config.js'
-import type {
-  RollupOutput,
-  RollupWatcher,
-  OutputAsset,
-  OutputOptions,
-} from 'rollup'
+import type { RollupOutput, OutputAsset, OutputOptions } from 'rollup'
 
 export default async (
   inlineBuildOptions: BuildOptions = {},
@@ -48,12 +43,19 @@ export default async (
                   input: inputFilePath,
                   plugins: [
                     inputFileName !== INDEX_HTML && {
+                      name: 'vite-ssr:rename-index-html',
                       generateBundle(options, bundle) {
-                        // Rename custom name to index.html
+                        // Rename custom name to index.html. Re-emit the asset
+                        // instead of assigning to `bundle`: Rolldown (Vite 8)
+                        // ignores assignments to the bundle object.
                         const htmlAsset = bundle[inputFileName]
+                        if (htmlAsset?.type !== 'asset') return
                         delete bundle[inputFileName]
-                        htmlAsset.fileName = INDEX_HTML
-                        bundle[INDEX_HTML] = htmlAsset
+                        this.emitFile({
+                          type: 'asset',
+                          fileName: INDEX_HTML,
+                          source: htmlAsset.source,
+                        })
                       },
                     },
                   ],
@@ -96,51 +98,48 @@ export default async (
 
     const clientResult = await build(clientBuildOptions)
 
-    const isWatching = Object.prototype.hasOwnProperty.call(
-      clientResult,
-      '_maxListeners'
-    )
-
-    if (isWatching) {
-      // This is a build watcher
-      const watcher = clientResult
+    // With `build.watch`, Vite returns a watcher instead of the output:
+    // Rollup's (Vite 6/7) or Rolldown's (Vite 8). Both have `on`.
+    if ('on' in clientResult) {
       let resolved = false
 
-      // @ts-ignore
-      watcher.on('event', async ({ result }) => {
-        if (result) {
-          // This piece runs everytime there is
-          // an updated frontend bundle.
-          result.close()
+      clientResult.on('event', async (event) => {
+        // Vite itself closes `event.result` and logs build errors.
+        if (event.code !== 'BUNDLE_END') return
 
-          // Re-read the index.html in case it changed.
-          // This content is not included in the virtual bundle.
-          indexHtmlTemplate = await fs.readFile(
-            (clientBuildOptions.build?.outDir as string) + `/${INDEX_HTML}`,
-            'utf-8'
-          )
+        // This piece runs everytime there is
+        // an updated frontend bundle.
 
-          // Build SSR bundle with the new index.html
-          await build(serverBuildOptions)
-          await generatePackageJson(
-            viteConfig,
-            clientBuildOptions,
-            serverBuildOptions
-          )
+        // Re-read the index.html in case it changed.
+        // This content is not included in the virtual bundle.
+        indexHtmlTemplate = await fs.readFile(
+          (clientBuildOptions.build?.outDir as string) + `/${INDEX_HTML}`,
+          'utf-8'
+        )
 
-          if (!resolved) {
-            resolve(null)
-            resolved = true
-          }
+        // Build SSR bundle with the new index.html
+        const serverResult = await build(serverBuildOptions)
+        await generatePackageJson(
+          viteConfig,
+          clientBuildOptions,
+          serverBuildOptions,
+          serverResult
+        )
+
+        if (!resolved) {
+          resolve(null)
+          resolved = true
         }
       })
     } else {
-      // This is a normal one-off build
+      // This is a normal one-off build.
+      // Vite 6/7 return Rollup output, Vite 8 returns Rolldown output:
+      // both have the same `output` shape.
       const clientOutputs = (
         Array.isArray(clientResult)
           ? clientResult
           : [clientResult]
-      ).flatMap((result) => (result as RollupOutput).output)
+      ).flatMap((result) => (result as unknown as RollupOutput).output)
 
       // Get the index.html from the resulting bundle.
       indexHtmlTemplate = (
@@ -149,7 +148,7 @@ export default async (
         ) as OutputAsset
       )?.source as string
 
-      await build(serverBuildOptions)
+      const serverResult = await build(serverBuildOptions)
 
       // index.html file is not used in SSR and might be
       // served by mistake.
@@ -165,7 +164,8 @@ export default async (
       await generatePackageJson(
         viteConfig,
         clientBuildOptions,
-        serverBuildOptions
+        serverBuildOptions,
+        serverResult
       )
 
       resolve(null)
@@ -175,7 +175,8 @@ export default async (
 async function generatePackageJson(
   viteConfig: ResolvedConfig,
   clientBuildOptions: InlineConfig,
-  serverBuildOptions: NonNullable<BuildOptions['serverOptions']>
+  serverBuildOptions: NonNullable<BuildOptions['serverOptions']>,
+  serverResult: unknown
 ) {
   if (serverBuildOptions.packageJson === false) return
 
@@ -188,18 +189,25 @@ async function generatePackageJson(
       ((viteConfig.build?.ssr || serverBuildOptions.build?.ssr) as string)
   )
 
-  // Rollup options have priority over `viteConfig.ssr.format`
+  // ESM unless the Rollup output format says otherwise (Vite 5 removed `ssr.format`)
   const moduleFormat =
     (viteConfig.build?.rollupOptions?.output as OutputOptions)?.format ||
     (serverBuildOptions.build?.rollupOptions?.output as OutputOptions)?.format
 
   const isESM = !moduleFormat || moduleFormat === 'es' || moduleFormat === 'esm'
 
+  // The entry file as the build wrote it. Its extension depends on the
+  // app's package.json "type": `main.js` with "module", else `main.mjs`.
+  const entryFileName = (
+    Array.isArray(serverResult) ? serverResult : [serverResult]
+  )
+    .flatMap((result) => (result as RollupOutput | undefined)?.output || [])
+    .find((file) => file.type === 'chunk' && file.isEntry)?.fileName
+
   const packageJson = {
-    // Vite 3+ adds '.mjs' extension to ESM files
-    main: outputFile
-      ? ssrOutput.base
-      : ssrOutput.name + (isESM ? '.mjs' : '.js'),
+    main:
+      entryFileName ||
+      (outputFile ? ssrOutput.base : ssrOutput.name + (isESM ? '.mjs' : '.js')),
     type: isESM ? 'module' : 'commonjs',
     ssr: {
       // This can be used later to serve static assets

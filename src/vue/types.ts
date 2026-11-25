@@ -5,7 +5,6 @@ import type {
   RouterOptions,
   Router,
 } from 'vue-router'
-import type { Unhead } from '@unhead/schema'
 import type {
   Meta,
   Renderer,
@@ -29,7 +28,8 @@ export interface Options extends SharedOptions {
 }
 
 type HookResponse = void | {
-  head?: Unhead<any>
+  /** The head from unhead's `createHead()` (unhead 1, 2 or 3) */
+  head?: object
 }
 
 export interface Context extends SharedContext {}

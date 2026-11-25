@@ -3,24 +3,13 @@ import React, { useState } from 'react'
 import { Link, Route, Routes } from 'react-router-dom'
 import logo from './logo.svg'
 import { ClientOnly } from '@flowtools/vite-ssr'
-import { ApolloClient, ApolloProvider, createHttpLink } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 
-export default function App({ isClient, url, router, apolloCache }) {
-  const baseUrl = isClient ? '' : url.origin
+export default function App({ router, apolloClient }) {
   const [count, setCount] = useState(0)
 
-  const client = new ApolloClient({
-    link: createHttpLink({
-      uri: `${baseUrl}/graphql`,
-      credentials: 'same-origin',
-    }),
-    ssrMode: !isClient,
-    cache: apolloCache,
-    credentials: 'same-origin',
-  })
-
   return (
-    <ApolloProvider client={client}>
+    <ApolloProvider client={apolloClient}>
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />

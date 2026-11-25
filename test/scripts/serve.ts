@@ -1,4 +1,6 @@
+import fs from 'fs'
 import path from 'path'
+import { pathToFileURL } from 'url'
 import { execa } from 'execa'
 import http from 'http'
 import express from 'express'
@@ -36,18 +38,19 @@ export default serve
 // This is a simple Node server that uses the built project.
 
 async function createServer(projectPath: string) {
-  global.fetch = require('node-fetch')
-  // This contains a list of static routes (assets)
-  const { ssr } = require(path.join(projectPath, 'dist/server/package.json'))
+  const readJson = (file: string) =>
+    JSON.parse(fs.readFileSync(path.join(projectPath, file), 'utf-8'))
+
+  // This contains the entry file and a list of static routes (assets)
+  const { main, ssr } = readJson('dist/server/package.json')
 
   // The manifest is required for preloading assets
-  const manifest = require(path.join(
-    projectPath,
-    'dist/client/.vite/ssr-manifest.json'
-  ))
+  const manifest = readJson('dist/client/.vite/ssr-manifest.json')
 
   // This is the server renderer we just built
-  const { default: renderPage } = await import(path.join(projectPath, 'dist/server'))
+  const { default: renderPage } = await import(
+    pathToFileURL(path.join(projectPath, 'dist/server', main)).href
+  )
 
   const server = express()
 
@@ -60,7 +63,7 @@ async function createServer(projectPath: string) {
   }
 
   // Everything else is treated as a "rendering request"
-  server.get('*', async (request, response) => {
+  server.use(async (request, response) => {
     const url =
       request.protocol + '://' + request.get('host') + request.originalUrl
 

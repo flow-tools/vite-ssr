@@ -29,10 +29,12 @@ export function getFullPath(url: string | URL | Location, routeBase?: string) {
   let fullPath = withoutPrefix(url.href, url.origin)
 
   if (routeBase) {
-    // routeBase = withSuffix(withPrefix(routeBase, S), S)
-    routeBase = withPrefix(routeBase, S)
-    if (fullPath.indexOf(routeBase) === 0) {
-      fullPath = withPrefix(fullPath.replace(routeBase, ''), S)
+    // Strip the base only at a segment boundary:
+    // base '/app' must not match '/application'.
+    routeBase = withoutSuffix(withPrefix(routeBase, S), S)
+    const rest = fullPath.slice(routeBase.length)
+    if (fullPath.startsWith(routeBase) && /^(?:[/?#]|$)/.test(rest)) {
+      fullPath = withPrefix(rest, S)
     }
   }
 

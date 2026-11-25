@@ -1,8 +1,8 @@
-const { defineConfig } = require('vite')
-const viteSSR = require('@flowtools/vite-ssr/plugin')
-const api = require('../node-server/api')
+import { defineConfig } from 'vite'
+import viteSSR from '@flowtools/vite-ssr/plugin'
+import { api } from '../node-server/api.js'
 
-module.exports = defineConfig({
+export default defineConfig({
   server: {
     fs: {
       // The API logic is in outside of the project

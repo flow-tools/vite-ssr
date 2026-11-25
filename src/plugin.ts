@@ -2,7 +2,9 @@ import type { Plugin, UserConfig } from 'vite'
 import type { ViteSsrPluginOptions } from './config'
 import type { SsrOptions } from './dev/server'
 import { createSSRDevHandler } from './dev/server.js'
-import { normalizePath } from 'vite'
+import { normalizePath, version as viteVersion } from 'vite'
+import { createRequire } from 'node:module'
+import path from 'node:path'
 
 const pluginName = '@flowtools/vite-ssr'
 const entryServer = '/entry-server.js'
@@ -30,7 +32,8 @@ export default function ViteSsrPlugin(
         detectedLib = isVue ? 'vue' : isReact ? 'react' : 'core'
 
         const detectedFeats = {
-          ...(isReact && detectReactConfigFeatures(options.features)),
+          ...(isReact &&
+            detectReactConfigFeatures(options.features, config.root)),
         }
 
         return {
@@ -45,7 +48,19 @@ export default function ViteSsrPlugin(
           },
           ssr: {
             ...detectedFeats.ssr,
-            noExternal: [pluginName],
+            // react-helmet-async 2 only ships CommonJS that Node can't read
+            // named exports from, so the ESM server bundle failed to import
+            // it. Bundling it uses its ESM build instead.
+            noExternal: isReact
+              ? [pluginName, 'react-helmet-async']
+              : [pluginName],
+            // Vite 6 resolves SSR externals without the `module-sync`
+            // condition (Vite 7+ adds it), so in dev React Router 7 loads
+            // as CommonJS and its named exports fail to import.
+            ...(isReact &&
+              Number.parseInt(viteVersion) < 7 && {
+                resolve: { externalConditions: ['node', 'module-sync'] },
+              }),
           },
           server:
             // Avoid displaying 'localhost' in terminal in MacOS:
@@ -81,6 +96,16 @@ export default function ViteSsrPlugin(
 
       // Implement auto-entry using virtual modules:
       resolveId(source, importer, options) {
+        // The Vue entry only imports the deprecated `@unhead/ssr` for
+        // unhead 1 and 2. unhead 3 apps may not have it installed, so
+        // leave it external instead of failing the build.
+        if (source === '@unhead/ssr' && importer?.includes(nameToMatch)) {
+          return this.resolve(source, importer, {
+            ...options,
+            skipSelf: true,
+          }).then((resolved) => resolved || { id: source, external: true })
+        }
+
         if (source.includes(nameToMatch)) {
           source = normalizePath(source)
           if (autoEntryRE.test(source)) {
@@ -135,9 +160,11 @@ function hasPlugin(plugins: Plugin[] | Plugin[][] = [], name: string): boolean {
   return !!plugins.flat().find((plugin) => (plugin.name || '').startsWith(name))
 }
 
-function hasDependency(dependency: string) {
+// Resolves from the app's root, like the app's own imports.
+// (`require` doesn't exist in this ES module.)
+function hasDependency(dependency: string, root = process.cwd()) {
   try {
-    require.resolve(dependency)
+    createRequire(path.resolve(root, 'package.json')).resolve(dependency)
     return true
   } catch (error) {
     return false
@@ -145,14 +172,15 @@ function hasDependency(dependency: string) {
 }
 
 function detectReactConfigFeatures(
-  features: ViteSsrPluginOptions['features'] = {}
+  features: ViteSsrPluginOptions['features'] = {},
+  root?: string
 ) {
   const external = []
   let useApolloRenderer
 
   // TODO use virtual modules for feature-detection
 
-  if (hasDependency('@apollo/client/react/ssr')) {
+  if (hasDependency('@apollo/client/react/ssr', root)) {
     useApolloRenderer = features.reactApolloRenderer !== false
   } else {
     external.push('@apollo/client')

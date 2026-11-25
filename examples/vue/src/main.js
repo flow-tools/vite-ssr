@@ -2,7 +2,8 @@ import './index.css'
 import App from './App.vue'
 import routes from './routes'
 import viteSSR, { ClientOnly } from '@flowtools/vite-ssr'
-import { createHead } from '@unhead/vue'
+import { createHead as createClientHead } from '@unhead/vue/client'
+import { createHead as createServerHead } from '@unhead/vue/server'
 
 export default viteSSR(
   App,
@@ -11,17 +12,20 @@ export default viteSSR(
     // debug: { mount: false },
   },
   ({ app, router, isClient, url, initialState, initialRoute, request }) => {
-    const head = createHead()
+    // index.html already has the charset and viewport tags
+    const head = import.meta.env.SSR
+      ? createServerHead({ disableDefaults: true })
+      : createClientHead()
     app.use(head)
 
     app.component(ClientOnly.name, ClientOnly)
 
     // Before each route navigation we request the data needed for showing the page.
-    router.beforeEach(async (to, from, next) => {
+    router.beforeEach(async (to) => {
       if (!!to.meta.state && Object.keys(to.meta.state).length > 0) {
         // This route has state already (from server) so it can be reused.
         // State is always empty in SPA development, but present in SSR development.
-        return next()
+        return
       }
 
       // `isClient` here is a handy way to determine if it's SSR or not.
@@ -57,8 +61,6 @@ export default viteSSR(
         console.error(error)
         // redirect to error route
       }
-
-      next()
     })
 
     return { head }

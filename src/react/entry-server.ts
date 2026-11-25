@@ -1,5 +1,7 @@
 import React, { ReactElement } from 'react'
-import { renderToString } from 'react-dom/server'
+// Namespace import: `renderToReadableStream` only exists in React 19's
+// Node build, and a missing named export would fail to load on React 18.
+import * as ReactDOMServer from 'react-dom/server'
 import { HelmetProvider } from 'react-helmet-async'
 import { StaticRouter, StaticRouterProps } from 'react-router'
 import ssrPrepass from 'react-ssr-prepass'
@@ -11,24 +13,57 @@ import { createRouter } from './utils.js'
 import { provideContext } from './components.js'
 export { ClientOnly, useContext } from './components.js'
 
-let render: (component: ReactElement) => string | Promise<string> =
-  renderToString
+const isReact19 = Number.parseInt(React.version) >= 19
 
-if (__USE_APOLLO_RENDERER__) {
-  // Apollo does not support Suspense so it needs its own
-  // renderer in order to await for async queries.
-  import('@apollo/client/react/ssr')
-    .then(({ renderToStringWithData }) => {
-      render = renderToStringWithData
-    })
-    .catch(() => null)
+// React 19: react-ssr-prepass no longer works, so React itself
+// waits for every Suspense boundary before the HTML is taken.
+async function renderToStringAllReady(app: ReactElement) {
+  const stream = await ReactDOMServer.renderToReadableStream(app)
+  await stream.allReady
+  return new Response(stream).text()
 }
+
+// React 19 renders <title>, <meta> and <link> (and the <style> and
+// <script> elements it can hoist) itself and, when the render does not
+// include <html>, writes them first. They belong in the document head.
+// react-helmet-async 3 relies on this on React 19 instead of its context.
+const hoistedTagRE =
+  /^(?:<title(?![^>]*\bitemprop=)[^>]*>[\s\S]*?<\/title>|<(?:meta|link)\b(?![^>]*\bitemprop=)[^>]*>|<style\b[^>]*\bdata-precedence=[^>]*>[\s\S]*?<\/style>|<script\b[^>]*\basync\b[^>]*>[\s\S]*?<\/script>)/
+
+function splitHoistedTags(html: string) {
+  let head = ''
+  let match
+  while ((match = html.match(hoistedTagRE))) {
+    head += match[0]
+    html = html.slice(match[0].length)
+  }
+
+  return { head, body: html }
+}
+
+const render: (component: ReactElement) => string | Promise<string> = isReact19
+  ? renderToStringAllReady
+  : ReactDOMServer.renderToString
+
+// Apollo's `useQuery` does not suspend, so on React 18 Apollo's own
+// renderer awaits its queries. On React 19, `render` already waits for
+// Suspense (which `useSuspenseQuery` uses), and Apollo's renderer
+// would not wait for lazy routes.
+const apolloRender: Promise<typeof render | undefined> | undefined =
+  __USE_APOLLO_RENDERER__ && !isReact19
+    ? import('@apollo/client/react/ssr')
+        .then((apollo) => apollo.renderToStringWithData)
+        .catch(() => undefined)
+    : undefined
+
+let warnedPrepassVisitor = false
 
 const viteSSR: SsrHandler = function (
   App,
   {
     routes,
     base,
+    suspenseFallback,
     prepassVisitor,
     PropsProvider,
     pageProps,
@@ -63,7 +98,13 @@ const viteSSR: SsrHandler = function (
       React.createElement(
         StaticRouter as React.FunctionComponent<StaticRouterProps>,
         { basename: routeBase, location: fullPath },
-        provideContext(React.createElement(App, context), context)
+        // Same Suspense boundary as entry-client, or hydration fails
+        // and React replaces the server HTML.
+        React.createElement(
+          React.Suspense,
+          { fallback: suspenseFallback || '' },
+          provideContext(React.createElement(App, context), context)
+        )
       )
     )
 
@@ -72,8 +113,17 @@ const viteSSR: SsrHandler = function (
       app = styles.collect(app)
     }
 
-    await ssrPrepass(app, prepassVisitor)
-    const body = await render(app)
+    if (!isReact19) {
+      await ssrPrepass(app, prepassVisitor)
+    } else if (prepassVisitor && !warnedPrepassVisitor) {
+      warnedPrepassVisitor = true
+      console.warn('[vite-ssr] `prepassVisitor` is not supported on React 19')
+    }
+
+    const html = await ((await apolloRender) || render)(app)
+    const { head: hoistedTags, body } = isReact19
+      ? splitHoistedTags(html)
+      : { head: '', body: html }
 
     if (isRedirect()) {
       styles && styles.cleanup && styles.cleanup()
@@ -98,6 +148,7 @@ const viteSSR: SsrHandler = function (
     styles && styles.cleanup && styles.cleanup()
 
     const headTags =
+      hoistedTags +
       Object.keys(tags)
         .map((key) => (tags[key] || '').toString())
         .join('') +

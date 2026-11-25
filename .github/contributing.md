@@ -8,13 +8,14 @@ These are mostly guidelines, not rules. Use your best judgment, and feel free to
 
 ## Running the Project Locally
 
-Make sure you use Node >= 14 first.
+You need pnpm and Node.js 22.22+ or 24.15+. See also [Working on this fork](../README.md#working-on-this-fork) in the README.
 
 1. Clone the project.
-2. Run `yarn` at the root to install all the dependencies.
-3. Run `yarn dev` at the root to start compiling the TS source and make it available to the examples folder.
-4. Move to any directory under `examples/` (vue/react/react-apollo/etc) and run `yarn dev` (or `yarn dev:spa`).
-5. Run `yarn build && yarn serve:node` in any example to test a production build.
+2. Run `pnpm install` at the root to install all the dependencies.
+3. Run `pnpm dev` at the root to start compiling the TS source and make it available to the examples and test fixtures.
+4. Move to any directory under `examples/` (vue/react/react-apollo/vanilla) and run `pnpm dev` (or `pnpm dev:spa`).
+5. Run `pnpm build && pnpm serve:node` in any example to test a production build.
+6. Run `pnpm test` at the root before opening a pull request.
 
 Adding new dependencies might require restarting the active processes.
 

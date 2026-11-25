@@ -1,13 +1,14 @@
 {
-  "name": "example",
+  "name": "vanilla-example",
   "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "node ../../node_modules/@flowtools/vite-ssr/cli.js --port 1337 --force --ssr src/entry-server.js",
     "dev:spa": "vite --port 1337 --force",
     "build": "rm -rf dist && node ../../node_modules/@flowtools/vite-ssr/cli.js build --ssr src/entry-server.js",
-    "serve:node": "node ../node-server/index vanilla"
+    "serve:node": "node ../node-server/index.js vanilla"
   },
-  "dependencies": {
-    "vite": "4.1.x"
+  "devDependencies": {
+    "vite": "^8.3.8"
   }
 }

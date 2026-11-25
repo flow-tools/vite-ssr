@@ -4,7 +4,7 @@
 
 # FORKED FROM [Vite SSR](https://github.com/frandiox/vite-ssr)
 
-I use this with vue, so react might not work. Use at your own risk.
+I use this with vue. Use at your own risk.
 Use nuxt, not this if unsure. I'm just avoiding a rewrite of a project that is heavily integraded with a express backend.
 
 Changed in this fork:
@@ -12,15 +12,27 @@ Changed in this fork:
 - unhead
 - esm
 - pnpm
+- Vite 6, 7 and 8 (Rolldown)
+- React 18 and 19
 
-❗️ Not working yet
+Supported versions:
 
-- test don't run
-- react is not tested at all
+| Package                         | Versions                                   |
+| ------------------------------- | ------------------------------------------ |
+| Node.js                         | ^20.19 or >=22.12 (Vite 6 also runs on 18) |
+| `vite`                          | 6, 7, 8                                    |
+| `vue` / `vue-router`            | 3.5 / 4, 5                                 |
+| `@unhead/vue`                   | 1, 2, 3                                    |
+| `react` / `react-dom`           | 18, 19                                     |
+| `react-router` (`-dom`)         | 7                                          |
+| `react-helmet-async`            | 1, 2, 3                                    |
+| `@vitejs/plugin-vue` / `-react` | the version that matches your Vite         |
+
+To work on the fork itself, see [Working on this fork](#working-on-this-fork).
 
 # Vite SSR
 
-Simple yet powerful Server Side Rendering for Vite 2 in Node.js (Vue & React).
+Simple yet powerful Server Side Rendering for Vite in Node.js (Vue & React).
 
 - ⚡ Lightning Fast HMR (powered by Vite, even in SSR mode).
 - 💁‍♂️ Consistent DX experience abstracting most of the SSR complexity.
@@ -49,7 +61,7 @@ Then, add `vite-ssr` with your package manager (direct dependency) and your fram
 pnpm add @flowtools/vite-ssr vue vue-router @unhead/vue
 
 # For React
-pnpm add @flowtools/vite-ssr react react-router-dom
+pnpm add @flowtools/vite-ssr react react-dom react-router-dom react-helmet-async
 ```
 
 Make sure that `index.html` contains a root element with id `app`: `<div id="app"></div>` (or change the default container id in plugin options: `options.containerId`).
@@ -293,7 +305,7 @@ export default {
 
 There are a few ways to provide initial state in React:
 
-- Call your API and throw a promise in order to leverage React's Suspense (in both browser and server) anywhere in your components. Vite SSR is already adding Suspense to the root so you don't need to provide it.
+- Call your API and throw a promise in order to leverage React's Suspense (in both browser and server) anywhere in your components. Vite SSR is already adding Suspense to the root so you don't need to provide it. On React 19, anything else that suspends also works during SSR, for example Apollo's `useSuspenseQuery` (see the [React + Apollo example](./examples/react-apollo/src/pages/Home.jsx)).
 
 ```jsx
 function App({ initialState }) {
@@ -391,7 +403,8 @@ export default viteSSR(
 In production, you control the server so you must pass these objects to the rendering function in order to have them available in the main hook:
 
 ```js
-import render from './dist/server'
+// The file name is in dist/server/package.json ("main")
+import render from './dist/server/main.js'
 
 //...
 
@@ -442,33 +455,23 @@ Use your framework's utilities to handle head tags and attributes for html and b
 <details><summary>Vue Head</summary>
 <p>
 
-Install [`unhead`](https://github.com/unjs/unhead) as follows:
+Install [`unhead`](https://unhead.unjs.io) for Vue:
 
 ```bash
-yarn add unhead @unhead/vue @unhead/ssr @unhead/addons
+pnpm add @unhead/vue
 ```
 
-```js
-import { defineConfig } from 'vite'
-import viteSSR from '@flowtools/vite-ssr/plugin'
-import UnheadVite from '@unhead/addons/vite'
-import Vue from '@vitejs/plugin-vue'
-
-export default defineConfig(
-  plugins: [
-    viteSSR(),
-    UnheadVite(),
-    Vue(),
-    // ...
-  ]
-)
-```
+Create the head in the main hook and return it, so Vite SSR can render it into the page. With unhead 2 and 3, the client and the server create their head differently:
 
 ```js
-import { createHead } from '@unhead/vue'
+import { createHead as createClientHead } from '@unhead/vue/client'
+import { createHead as createServerHead } from '@unhead/vue/server'
 
 export default viteSSR(App, { routes }, ({ app }) => {
-  const head = createHead()
+  const head = import.meta.env.SSR
+    ? // index.html already has the charset and viewport tags
+      createServerHead({ disableDefaults: true })
+    : createClientHead()
   app.use(head)
 
   return { head }
@@ -477,6 +480,21 @@ export default viteSSR(App, { routes }, ({ app }) => {
 // In your components:
 // import { useHead } from '@unhead/vue'
 // ... useHead({ ... })
+```
+
+With unhead 1, use `createHead` from `@unhead/vue` for both. unhead 1 and 2 also need `@unhead/ssr` installed, which Vite SSR uses to render their heads. unhead 3 heads render themselves.
+
+Optionally, add unhead's Vite plugin for build-time optimizations:
+
+```js
+import { defineConfig } from 'vite'
+import viteSSR from '@flowtools/vite-ssr/plugin'
+import { Unhead } from '@unhead/vue/vite' // unhead 1: `import Unhead from '@unhead/addons/vite'`
+import vue from '@vitejs/plugin-vue'
+
+export default defineConfig({
+  plugins: [viteSSR(), Unhead(), vue()],
+})
 ```
 
 </p>
@@ -500,6 +518,8 @@ import { Helmet } from 'react-helmet-async'
   </Helmet>
 </>
 ```
+
+On React 19, react-helmet-async 3 lets React render these tags, and Vite SSR moves them into `<head>`. Helmet's `htmlAttributes` and `bodyAttributes` (like `<html lang="en" />` above) are then only applied in the browser.
 
 </p>
 </details>
@@ -533,24 +553,21 @@ SPA mode will be slightly faster but the SSR one will have closer behavior to a 
 If you want to run your own dev server (e.g. Express.js) instead of Vite's default Node + Connect, you can use Vite SSR in middleware mode:
 
 ```js
-const express = require('express')
-const { createSsrServer } = require('@flowtools/vite-ssr/dev')
+import express from 'express'
+import { createSsrServer } from '@flowtools/vite-ssr/dev/index.js'
 
-async function createServer() {
-  const app = express()
+const app = express()
 
-  // Create vite-ssr server in middleware mode.
-  const viteServer = await createSsrServer({
-    server: { middlewareMode: 'ssr' },
-  })
+// Create vite-ssr server in middleware mode.
+const viteServer = await createSsrServer({
+  server: { middlewareMode: true },
+  appType: 'custom',
+})
 
-  // Use vite's connect instance as middleware
-  app.use(viteServer.middlewares)
+// Use vite's connect instance as middleware
+app.use(viteServer.middlewares)
 
-  app.listen(3000)
-}
-
-createServer()
+app.listen(3000)
 ```
 
 ## Production
@@ -614,6 +631,33 @@ declare module '@flowtools/vite-ssr/vue' {
   }
 }
 ```
+
+## Working on this fork
+
+You need pnpm and Node.js 22.22+ or 24.15+ for the dev tools. The published package runs wherever your Vite version runs.
+
+```sh
+pnpm install # also downloads Chromium for the browser tests
+pnpm dev     # compiles src/ into node_modules/@flowtools/vite-ssr and recompiles on save
+```
+
+In a second terminal, run a test fixture or an example against that build:
+
+```sh
+pnpm --filter test-vue-ts-basic dev # SSR dev server on http://localhost:1337
+pnpm --filter vue-example dev       # also: react-example, react-apollo-example, vanilla-example
+```
+
+Restart that dev server after changing `src/`: it loads the plugin once at startup.
+
+Other commands:
+
+- `pnpm test`: builds the package and runs the unit tests and the browser tests on `test/fixtures`.
+- `pnpm build`: builds the publishable package into `dist/`.
+- `pnpm --filter vue-example build`, then `pnpm --filter vue-example serve:node`: production build of an example, served by [`examples/node-server`](./examples/node-server/index.js) on http://localhost:8080.
+- `pnpm release`: builds, bumps the version, commits, tags, pushes and publishes.
+
+The fixtures and examples load the fork from the root `node_modules`, so they must use the same `react`, `vue`, `vue-router` and `unhead` versions as the root (currently the newest: Vite 8, React 19, vue-router 5, unhead 3). With a different version, the fork and the app would each get their own copy.
 
 ## Community contributions
 
