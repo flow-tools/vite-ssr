@@ -48,12 +48,19 @@ export default async (
                   input: inputFilePath,
                   plugins: [
                     inputFileName !== INDEX_HTML && {
+                      name: 'vite-ssr:rename-index-html',
                       generateBundle(options, bundle) {
-                        // Rename custom name to index.html
+                        // Rename custom name to index.html. Re-emit the asset
+                        // instead of assigning to `bundle`: Rolldown (Vite 8)
+                        // ignores assignments to the bundle object.
                         const htmlAsset = bundle[inputFileName]
+                        if (htmlAsset?.type !== 'asset') return
                         delete bundle[inputFileName]
-                        htmlAsset.fileName = INDEX_HTML
-                        bundle[INDEX_HTML] = htmlAsset
+                        this.emitFile({
+                          type: 'asset',
+                          fileName: INDEX_HTML,
+                          source: htmlAsset.source,
+                        })
                       },
                     },
                   ],
@@ -135,12 +142,14 @@ export default async (
         }
       })
     } else {
-      // This is a normal one-off build
+      // This is a normal one-off build.
+      // Vite 6/7 return Rollup output, Vite 8 returns Rolldown output:
+      // both have the same `output` shape.
       const clientOutputs = (
         Array.isArray(clientResult)
           ? clientResult
           : [clientResult]
-      ).flatMap((result) => (result as RollupOutput).output)
+      ).flatMap((result) => (result as unknown as RollupOutput).output)
 
       // Get the index.html from the resulting bundle.
       indexHtmlTemplate = (
