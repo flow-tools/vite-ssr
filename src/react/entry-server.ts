@@ -29,6 +29,7 @@ const viteSSR: SsrHandler = function (
   {
     routes,
     base,
+    suspenseFallback,
     prepassVisitor,
     PropsProvider,
     pageProps,
@@ -63,7 +64,13 @@ const viteSSR: SsrHandler = function (
       React.createElement(
         StaticRouter as React.FunctionComponent<StaticRouterProps>,
         { basename: routeBase, location: fullPath },
-        provideContext(React.createElement(App, context), context)
+        // Same Suspense boundary as entry-client, or hydration fails
+        // and React replaces the server HTML.
+        React.createElement(
+          React.Suspense,
+          { fallback: suspenseFallback || '' },
+          provideContext(React.createElement(App, context), context)
+        )
       )
     )
 
