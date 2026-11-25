@@ -1,7 +1,6 @@
 import { test } from 'uvu'
 import * as assert from 'uvu/assert'
 import { setup, reset } from '../../setup/per-suite'
-import fetch from 'node-fetch'
 
 const FIXTURE = 'vue-ts-basic'
 
@@ -24,6 +23,8 @@ test(`${FIXTURE}/home`, async (context) => {
   await context.page.click('button')
   assert.is(await context.page.textContent('button'), 'Count:1')
   await context.page.click('a[href="/about"]')
+  // The router loads the lazy route's chunk before it renders the page
+  await context.page.waitForSelector('h1:has-text("About Page")')
   assert.is(await context.page.textContent('h1'), 'About Page')
   assert.is(await context.page.textContent('button'), 'Count:1')
 })
