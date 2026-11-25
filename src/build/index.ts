@@ -118,11 +118,12 @@ export default async (
         )
 
         // Build SSR bundle with the new index.html
-        await build(serverBuildOptions)
+        const serverResult = await build(serverBuildOptions)
         await generatePackageJson(
           viteConfig,
           clientBuildOptions,
-          serverBuildOptions
+          serverBuildOptions,
+          serverResult
         )
 
         if (!resolved) {
@@ -147,7 +148,7 @@ export default async (
         ) as OutputAsset
       )?.source as string
 
-      await build(serverBuildOptions)
+      const serverResult = await build(serverBuildOptions)
 
       // index.html file is not used in SSR and might be
       // served by mistake.
@@ -163,7 +164,8 @@ export default async (
       await generatePackageJson(
         viteConfig,
         clientBuildOptions,
-        serverBuildOptions
+        serverBuildOptions,
+        serverResult
       )
 
       resolve(null)
@@ -173,7 +175,8 @@ export default async (
 async function generatePackageJson(
   viteConfig: ResolvedConfig,
   clientBuildOptions: InlineConfig,
-  serverBuildOptions: NonNullable<BuildOptions['serverOptions']>
+  serverBuildOptions: NonNullable<BuildOptions['serverOptions']>,
+  serverResult: unknown
 ) {
   if (serverBuildOptions.packageJson === false) return
 
@@ -186,18 +189,25 @@ async function generatePackageJson(
       ((viteConfig.build?.ssr || serverBuildOptions.build?.ssr) as string)
   )
 
-  // Rollup options have priority over `viteConfig.ssr.format`
+  // ESM unless the Rollup output format says otherwise (Vite 5 removed `ssr.format`)
   const moduleFormat =
     (viteConfig.build?.rollupOptions?.output as OutputOptions)?.format ||
     (serverBuildOptions.build?.rollupOptions?.output as OutputOptions)?.format
 
   const isESM = !moduleFormat || moduleFormat === 'es' || moduleFormat === 'esm'
 
+  // The entry file as the build wrote it. Its extension depends on the
+  // app's package.json "type": `main.js` with "module", else `main.mjs`.
+  const entryFileName = (
+    Array.isArray(serverResult) ? serverResult : [serverResult]
+  )
+    .flatMap((result) => (result as RollupOutput | undefined)?.output || [])
+    .find((file) => file.type === 'chunk' && file.isEntry)?.fileName
+
   const packageJson = {
-    // Vite 3+ adds '.mjs' extension to ESM files
-    main: outputFile
-      ? ssrOutput.base
-      : ssrOutput.name + (isESM ? '.mjs' : '.js'),
+    main:
+      entryFileName ||
+      (outputFile ? ssrOutput.base : ssrOutput.name + (isESM ? '.mjs' : '.js')),
     type: isESM ? 'module' : 'commonjs',
     ssr: {
       // This can be used later to serve static assets
