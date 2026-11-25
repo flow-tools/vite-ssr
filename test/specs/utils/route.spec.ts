@@ -49,21 +49,22 @@ test('createUrl', () => {
 })
 
 test('getFullPath', () => {
-  assert.is(getFullPath(new URL('http://e.g/my/path')), '/my/path/')
-  assert.is(getFullPath('/my/path'), '/my/path/')
-  assert.is(getFullPath('/my/path?query'), '/my/path/?query')
+  assert.is(getFullPath(new URL('http://e.g/my/path')), '/my/path')
+  assert.is(getFullPath('/my/path'), '/my/path')
+  assert.is(getFullPath('/my/path?query'), '/my/path?query')
 
-  assert.is(getFullPath('/my/path', '/my'), '/path/')
+  assert.is(getFullPath('/my/path', '/my'), '/path')
   assert.is(getFullPath('/my/path/', '/my'), '/path/')
-  assert.is(getFullPath('/my/path?query', '/my'), '/path/?query')
+  assert.is(getFullPath('/my/path?query', '/my'), '/path?query')
+  assert.is(getFullPath('/my/path', '/my/'), '/path')
 
   assert.is(getFullPath('/my/', '/my'), '/')
   assert.is(getFullPath('/my', '/my'), '/')
   assert.is(getFullPath('/my/?query', '/my'), '/?query')
   assert.is(getFullPath('/my?query', '/my'), '/?query')
 
-  assert.is(getFullPath('/my/deep/path', '/my/deep'), '/path/')
-  assert.is(getFullPath('/my/deepest/path', '/my/deep'), '/my/deepest/path/')
+  assert.is(getFullPath('/my/deep/path', '/my/deep'), '/path')
+  assert.is(getFullPath('/my/deepest/path', '/my/deep'), '/my/deepest/path')
 })
 
 test.run()
