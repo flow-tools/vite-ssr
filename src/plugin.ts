@@ -2,7 +2,7 @@ import type { Plugin, UserConfig } from 'vite'
 import type { ViteSsrPluginOptions } from './config'
 import type { SsrOptions } from './dev/server'
 import { createSSRDevHandler } from './dev/server.js'
-import { normalizePath } from 'vite'
+import { normalizePath, version as viteVersion } from 'vite'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
@@ -48,7 +48,19 @@ export default function ViteSsrPlugin(
           },
           ssr: {
             ...detectedFeats.ssr,
-            noExternal: [pluginName],
+            // react-helmet-async 2 only ships CommonJS that Node can't read
+            // named exports from, so the ESM server bundle failed to import
+            // it. Bundling it uses its ESM build instead.
+            noExternal: isReact
+              ? [pluginName, 'react-helmet-async']
+              : [pluginName],
+            // Vite 6 resolves SSR externals without the `module-sync`
+            // condition (Vite 7+ adds it), so in dev React Router 7 loads
+            // as CommonJS and its named exports fail to import.
+            ...(isReact &&
+              Number.parseInt(viteVersion) < 7 && {
+                resolve: { externalConditions: ['node', 'module-sync'] },
+              }),
           },
           server:
             // Avoid displaying 'localhost' in terminal in MacOS:
