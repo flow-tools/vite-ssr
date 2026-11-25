@@ -3,6 +3,8 @@ import type { ViteSsrPluginOptions } from './config'
 import type { SsrOptions } from './dev/server'
 import { createSSRDevHandler } from './dev/server.js'
 import { normalizePath } from 'vite'
+import { createRequire } from 'node:module'
+import path from 'node:path'
 
 const pluginName = '@flowtools/vite-ssr'
 const entryServer = '/entry-server.js'
@@ -30,7 +32,8 @@ export default function ViteSsrPlugin(
         detectedLib = isVue ? 'vue' : isReact ? 'react' : 'core'
 
         const detectedFeats = {
-          ...(isReact && detectReactConfigFeatures(options.features)),
+          ...(isReact &&
+            detectReactConfigFeatures(options.features, config.root)),
         }
 
         return {
@@ -135,9 +138,11 @@ function hasPlugin(plugins: Plugin[] | Plugin[][] = [], name: string): boolean {
   return !!plugins.flat().find((plugin) => (plugin.name || '').startsWith(name))
 }
 
-function hasDependency(dependency: string) {
+// Resolves from the app's root, like the app's own imports.
+// (`require` doesn't exist in this ES module.)
+function hasDependency(dependency: string, root = process.cwd()) {
   try {
-    require.resolve(dependency)
+    createRequire(path.resolve(root, 'package.json')).resolve(dependency)
     return true
   } catch (error) {
     return false
@@ -145,14 +150,15 @@ function hasDependency(dependency: string) {
 }
 
 function detectReactConfigFeatures(
-  features: ViteSsrPluginOptions['features'] = {}
+  features: ViteSsrPluginOptions['features'] = {},
+  root?: string
 ) {
   const external = []
   let useApolloRenderer
 
   // TODO use virtual modules for feature-detection
 
-  if (hasDependency('@apollo/client/react/ssr')) {
+  if (hasDependency('@apollo/client/react/ssr', root)) {
     useApolloRenderer = features.reactApolloRenderer !== false
   } else {
     external.push('@apollo/client')
