@@ -4,7 +4,6 @@ import { renderToString } from 'vue/server-renderer'
 import { createRouter, createMemoryHistory, RouteRecordRaw } from 'vue-router'
 import { getFullPath, withoutSuffix } from '../utils/route.js'
 import { addPagePropsGetterToRoutes } from './utils.js'
-import { renderSSRHead } from '@unhead/ssr'
 import coreViteSSR from '../core/entry-server.js'
 import type { SsrHandler } from './types'
 
@@ -79,11 +78,22 @@ export const viteSSR: SsrHandler = function viteSSR(
       bodyTagsOpen = '',
       htmlAttrs = '',
       bodyAttrs = '',
-    } = head ? await renderSSRHead(head) : {}
+    } = head ? await renderHead(head) : {}
 
     return { body, headTags, bodyTags, bodyTagsOpen, htmlAttrs, bodyAttrs, bodyTeleports }
 
   })
+}
+
+// unhead 3 server heads render themselves. unhead 1 and 2 need
+// `@unhead/ssr`, which unhead 3 deprecates (it warns when imported),
+// so it is only loaded for those versions.
+async function renderHead(head: object) {
+  const { render } = head as { render?: () => Promise<Record<string, string>> }
+  if (typeof render === 'function') return render.call(head)
+
+  const { renderSSRHead } = await import('@unhead/ssr')
+  return renderSSRHead(head as Parameters<typeof renderSSRHead>[0])
 }
 
 export default viteSSR

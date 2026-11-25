@@ -96,6 +96,16 @@ export default function ViteSsrPlugin(
 
       // Implement auto-entry using virtual modules:
       resolveId(source, importer, options) {
+        // The Vue entry only imports the deprecated `@unhead/ssr` for
+        // unhead 1 and 2. unhead 3 apps may not have it installed, so
+        // leave it external instead of failing the build.
+        if (source === '@unhead/ssr' && importer?.includes(nameToMatch)) {
+          return this.resolve(source, importer, {
+            ...options,
+            skipSelf: true,
+          }).then((resolved) => resolved || { id: source, external: true })
+        }
+
         if (source.includes(nameToMatch)) {
           source = normalizePath(source)
           if (autoEntryRE.test(source)) {
