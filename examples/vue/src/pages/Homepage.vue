@@ -46,7 +46,7 @@ export default defineComponent({
       script: [
         {
           type: 'application/ld+json',
-          children: JSON.stringify({ something: true }),
+          innerHTML: JSON.stringify({ something: true }),
         },
       ],
     })

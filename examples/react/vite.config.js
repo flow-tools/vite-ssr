@@ -1,22 +1,20 @@
-const { defineConfig } = require('vite')
-const react = require('@vitejs/plugin-react')
-const viteSSR = require('@flowtools/vite-ssr/plugin')
-const api = require('../node-server/api')
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import viteSSR from '@flowtools/vite-ssr/plugin'
+import { api } from '../node-server/api.js'
 
-module.exports = defineConfig({
+export default defineConfig({
   server: {
     fs: {
       // The API logic is in outside of the project
       strict: false,
     },
   },
-  ssr: { format: 'cjs' },
   plugins: [
     viteSSR({
       features: {
         // Manually disable features that are
         // detected because this is a mono repo
-        reactStyledComponents: false,
         reactApolloRenderer: false,
       },
     }),

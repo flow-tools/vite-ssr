@@ -62,13 +62,13 @@ export const api = [
     async handler(req, res) {
       const body = await parseBody(req)
 
-      const data = await graphql(
+      const data = await graphql({
         schema,
-        body.query,
-        root,
-        body.operationName,
-        body.variables
-      )
+        source: body.query,
+        rootValue: root,
+        operationName: body.operationName,
+        variableValues: body.variables,
+      })
 
       res.setHeader('Cache-Control', 'max-age=0')
       res.end(JSON.stringify(data))

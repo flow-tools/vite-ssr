@@ -16,8 +16,17 @@
 </template>
 
 <script>
+import { useHead } from '@unhead/vue'
+
 export default {
   name: 'App',
+  setup() {
+    // Defaults for pages that don't set their own
+    useHead({
+      title: 'Vite SSR Vue example',
+      meta: [{ name: 'description', content: 'Vue example for vite-ssr' }],
+    })
+  },
   data() {
     return {
       count: 0,
